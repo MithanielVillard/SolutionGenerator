@@ -16,7 +16,8 @@ public:
 
 private:
     void GenerateSolFile(const std::string& reposName, const std::string& solutionName, const std::string& projectName);
-    void GeneratePrjFile(const std::string& reposName, const std::string& projectName, bool pch, bool vcpkg);
+    void GeneratePrjFile(const std::string& reposName, const std::string& solutionName);
+    void AddProjectToPrj(const std::string& reposName, const std::string& projectName, bool vcpkg, bool pch);
     void GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<long>& projectsGuid);
     void GenerateVcxprojFile(const std::string& reposName, const std::string& projectName, long projectGuid, const std::string& pch, bool vcpkg);
 
@@ -25,7 +26,7 @@ private:
     void CreatePChFile(const std::string& reposName, const std::string& projectNamea);
     void CreateVcpkgFile(const std::string& projectName);
 
-    std::string FindSolFile(const std::string& reposName);
+    std::string FindPrjFile(const std::string& reposName);
 
     void GetAllDirFiles(const std::string& dir, std::ofstream& vcxproj);
 

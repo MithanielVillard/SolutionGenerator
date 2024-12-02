@@ -1,7 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#define VERSION "beta 1.0.0"
+#define VERSION "beta 1.16.0 re"
 
 #define HELP_MESSAGE \
     "\nLe Solution Generator est un outil permettant de generer des solutions Visual Studio.\n" \
@@ -43,6 +43,21 @@
     "  \"dependencies\": [\n"\
     "  ]\n"\
     "}"
+
+#define PRJ_FILE \
+    "{\n"\
+    "    \"solution_name\":\"\" \n"\
+    "}"
+
+#define PROJECT_JSON \
+    "{\n"\
+    R"(    "vcpkg": "false",)" \
+    R"(    "pch": "false",)" \
+    R"(    "window": "false",)" \
+    R"(    "lib": "false")" \
+    "}\n"\
+    
+
     
 
 #endif

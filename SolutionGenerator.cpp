@@ -43,8 +43,9 @@ void SolutionGenerator::CreateProject(const std::string& reposName, const std::s
 
         std::cout << "Arborescence cree \n";
         
-        GenerateSolFile(reposName, solutionName, projectName);
-        GeneratePrjFile(reposName, projectName, pch ? "Use" : "NotUsing", vcpkg);
+        //GenerateSolFile(reposName, solutionName, projectName);
+        GeneratePrjFile(reposName, solutionName);
+        AddProjectToPrj(reposName, projectName, vcpkg, pch);
     }
     MakeProject(reposName);
     Utils::CoutColored("Projet creer avec succes !\n", Success);
@@ -89,7 +90,7 @@ void SolutionGenerator::CreateVcpkgFile(const std::string& reposName)
 void SolutionGenerator::GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<long>& projectsGuid)
 {
     std::ifstream solFile;
-    std::string solutionName = FindSolFile(reposName);
+    std::string solutionName = FindPrjFile(reposName);
     if (solutionName.empty()) return;
     solFile.open(solutionName);
     nlohmann::json solJson = nlohmann::json::parse(solFile);
@@ -123,16 +124,16 @@ void SolutionGenerator::GenerateSolution(const std::string& reposName, const std
     file.close();
 }
 
-std::string SolutionGenerator::FindSolFile(const std::string& reposName)
+std::string SolutionGenerator::FindPrjFile(const std::string& reposName)
 {
     for(auto& entry : fs::directory_iterator(reposName+"/config"))
     {
-        if (entry.path().extension() == ".sol")
+        if (entry.path().extension() == ".prj")
         {
             return entry.path().string();
         }
     }
-    Utils::CoutColored("Pas de fichier sol trouve", Error);
+    Utils::CoutColored("Pas de fichier .prj trouve", Error);
     return std::string("");
 }
 
@@ -261,69 +262,35 @@ void SolutionGenerator::GenerateSolFile(const std::string& reposName, const std:
     std::cout << "Fichier .sol genere \n";
 }
 
-void SolutionGenerator::GeneratePrjFile(const std::string& reposName, const std::string& projectName, bool pch, bool vcpkg)
+void SolutionGenerator::GeneratePrjFile(const std::string& reposName, const std::string& solutionName)
 {
-    nlohmann::json prjJson =
-    {
-        {"name", projectName},
-        {"folder", projectName+"/"},
-        {"vc_project_version", "17.0"},
-        {"root_namespace", projectName},
-        {"windows_target_platform_version", "10.0"},
-        {"use_vcpkg", vcpkg ? "true" : "false"},
-        {"use_vcpkg_manifest", vcpkg ? "true" : "false"},
-        {"configuration", nlohmann::json::array({
-            {
-                {"name", "Debug|x64"},
-                {"type", "Application"},
-                {"platform_toolset", "v143"},
-                {"out_dir", "$(ProjectDir)Build\\$(Configuration)\\"},
-                {"int_dir", "$(ProjectDir)Build\\$(Configuration)\\intermediate\\"},
-                {"language_standard", "stdcpp20"},
-                {"character_set", "Unicode"},
-                {"precompiled_header", pch ? "Use" : "NotUsing"},
-                {"precompiled_header_file", "pch.h"},
-                {"sdl_check", "true"},
-                {"conformance_mode", "true"},
-                {"subsystem", "Windows"},
-                {"generate_debug_information", "true"},
-                {"use_debug_libraries", "true"},
-                {"warning_level", "Level3"},
-                {"preprocessor_definitions", "_DEBUG;_WINDOWS;%(PreprocessorDefinitions)"},
-                {"additional_dependencies", "%(AdditionalDependencies)"},
-                {"additional_include_directories", ""},
-                {"additional_library_directories", ""},
-                {"vcpkg_configuration", "Debug"}
-            },
-            {
-                {"name", "Release|x64"},
-                {"type", "Application"},
-                {"platform_toolset", "v143"},
-                {"out_dir", "$(ProjectDir)Build\\$(Configuration)\\"},
-                {"int_dir", "$(ProjectDir)Build\\$(Configuration)\\intermediate\\"},
-                {"language_standard", "stdcpp20"},
-                {"character_set", "Unicode"},
-                {"precompiled_header", pch ? "Use" : "NotUsing"},
-                {"precompiled_header_file", "pch.h"},
-                {"sdl_check", "true"},
-                {"conformance_mode", "true"},
-                {"subsystem", "Windows"},
-                {"generate_debug_information", "false"},
-                {"use_debug_libraries", "false"},
-                {"warning_level", "Level3"},
-                {"preprocessor_definitions", "NDEBUG;_WINDOWS;%(PreprocessorDefinitions)"},
-                {"additional_dependencies", "%(AdditionalDependencies)"},
-                {"additional_include_directories", ""},
-                {"additional_library_directories", ""},
-                {"vcpkg_configuration", "Release"}
-                }
-            })}
-        };
-    
-    std::ofstream prjFile(reposName+"/config/"+projectName+".prj");
+    std::ofstream prjFile(reposName+"/config/"+solutionName+".prj");
+    nlohmann::json prjJson = nlohmann::json::parse(PRJ_FILE);
+
+    prjJson["solution_name"] = solutionName;
     prjFile << std::setw(4) << prjJson;
+    
     prjFile.close();
     std::cout << "Fichier .prj genere \n";
+}
+
+void SolutionGenerator::AddProjectToPrj(const std::string& reposName, const std::string& projectName, bool vcpkg,
+    bool pch)
+{
+    std::string prjPath = FindPrjFile(reposName);
+    std::ifstream prjFileRead(prjPath);
+    
+    nlohmann::json prjJson = nlohmann::json::parse(prjFileRead);
+    prjJson[projectName] =  nlohmann::json::parse(PROJECT_JSON);
+    prjJson[projectName]["vcpkg"] = vcpkg ? "true" : "false";
+    prjJson[projectName]["pch"] = pch ? "true" : "false";
+    prjFileRead.close();
+    
+    std::ofstream prjFileWrite(prjPath);
+    prjFileWrite << std::setw(4) << prjJson;
+    prjFileWrite.close();
+    
+    Utils::CoutColored("Project " + projectName + " added\n", Success);
 }
 
 void SolutionGenerator::MakeProject(const std::string& reposName)
@@ -333,25 +300,24 @@ void SolutionGenerator::MakeProject(const std::string& reposName)
     std::vector<std::string> projectsName;
     std::vector<long> projectsGuid;
 
+    std::ifstream prjFile(FindPrjFile(reposName));
+    nlohmann::json prjJson = nlohmann::json::parse(prjFile);
+
     for(auto& element : fs::directory_iterator(reposName+"/src"))
     {
         std::string projectName = element.path().filename().string();
 
-        if (fs::exists(reposName+"/config/"+projectName+".prj") == false)
+        if (!prjJson.contains(projectName))
         {
-            Utils::CoutColored("Dossier " + projectName + " detecte dans le repertoire src sans fichiers de configuration", Warning);
+            Utils::CoutColored("Dossier " + projectName + " detecte dans le repertoire src mais sans configuration dans le fichier .prj", Warning);
             continue;
         }
 
-        fs::create_directories(reposName+"/ide/vs/"+projectName);
+        fs::create_directories(reposName+"/ide/vs/"+=projectName);
         long projectGuid = Utils::GenerateGUID();
-
-        std::ifstream prjFile;
-        prjFile.open(reposName+"/config/"+projectName+".prj", std::ifstream::in);
-        nlohmann::json prjJson = nlohmann::json::parse(prjFile);
-        GenerateVcxprojFile(reposName, projectName, projectGuid, prjJson["configuration"][0]["precompiled_header"], prjJson["use_vcpkg"] == "true");
+        
+        GenerateVcxprojFile(reposName, projectName, projectGuid, prjJson[projectName]["pch"] == std::string("true") ? "Use" : "NotUsing", prjJson[projectName]["vcpkg"] == std::string("true"));
         PopulateVcxprojFile(reposName, projectName);
-        prjFile.close();
 
         projectsName.push_back(projectName);
         projectsGuid.push_back(projectGuid);
@@ -361,6 +327,7 @@ void SolutionGenerator::MakeProject(const std::string& reposName)
         Utils::CoutColored(" Genere\n", Success);
     }
 
+    prjFile.close();
     GenerateSolution(reposName, projectsName, projectsGuid);
     Utils::CoutColored("Solution generee avec succes !\n", Success);
     ShellExecuteA(NULL, "open", fs::absolute(reposName+"/ide/vs").string().c_str(), NULL, NULL, SW_SHOWNORMAL);
