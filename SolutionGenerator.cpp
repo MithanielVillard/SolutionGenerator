@@ -17,7 +17,8 @@ void SolutionGenerator::PrintHelpMessage()
     std::cout << HELP_MESSAGE << "\n";
 }
 
-void SolutionGenerator::CreateProject(const std::string& reposName, const std::string& solutionName, const std::string& projectName, bool pch, bool vcpkg)
+void SolutionGenerator::CreateRepos(const std::string& reposName, const std::string& solutionName, const std::string& projectName,
+    bool pch, bool vcpkg, bool window, bool lib)
 {
     if(fs::exists(reposName))
     {
@@ -29,28 +30,27 @@ void SolutionGenerator::CreateProject(const std::string& reposName, const std::s
     {
         fs::create_directories(reposName + "/config");
         fs::create_directories(reposName + "/ide");
-        if (fs::create_directories(reposName + "/src"))
-        {
-            fs::create_directories(reposName + "/src/"+projectName);
-        }
+        fs::create_directories(reposName + "/src");
         fs::create_directories(reposName + "/res");
-        std::ofstream gitignore(reposName + "/gitignore");
+        std::ofstream gitignore(reposName + "/.gitignore");
         gitignore << "ide";
         gitignore.close();
 
-        if (pch) CreatePChFile(reposName, projectName);
-        if (vcpkg) CreateVcpkgFile(reposName);
+        std::ofstream bat(reposName + "/make.bat");
+        bat << "cd ..\n";
+        bat << "SolutionGen.exe -make "+reposName;
+        bat.close();
 
         std::cout << "Arborescence cree \n";
         
         GeneratePrjFile(reposName, solutionName);
-        AddProjectToPrj(reposName, projectName, vcpkg, pch);
+        CreateProject(reposName, projectName, pch, vcpkg, window, lib);
     }
     MakeProject(reposName);
     Utils::CoutColored("Projet creer avec succes !\n", Success);
 }
 
-void SolutionGenerator::CreatePChFile(const std::string& reposName, const std::string& projectName)
+void SolutionGenerator::CreatePCHFile(const std::string& reposName, const std::string& projectName)
 {
     std::ofstream pchH(reposName + "/src/"+projectName+"/pch.h");
     pchH << PCH_H;
@@ -61,9 +61,9 @@ void SolutionGenerator::CreatePChFile(const std::string& reposName, const std::s
     pchCpp.close();
 }
 
-void SolutionGenerator::CreateVcpkgFile(const std::string& reposName)
+void SolutionGenerator::CreateVcpkgFile(const std::string& reposName, const std::string& projectName)
 {
-    std::ofstream vcpkgFile(reposName + "/config/vcpkg.json");
+    std::ofstream vcpkgFile(reposName + "/config/"+projectName+"/vcpkg.json");
     vcpkgFile << VCPKG_JSON; // todo A VOIR
     vcpkgFile.close();
 
@@ -165,7 +165,7 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
         vcxprojFile << R"(  <PropertyGroup Label="Vcpkg">)" << "\n";
         vcxprojFile << R"(    <VcpkgEnable>true</VcpkgEnable>)" << "\n";
         vcxprojFile << R"(    <VcpkgEnableManifest>true</VcpkgEnableManifest>)" << "\n";
-        vcxprojFile << R"(    <VcpkgManifestRoot>..\..\..\config\</VcpkgManifestRoot>)" << "\n";
+        vcxprojFile << R"(    <VcpkgManifestRoot>..\..\..\config\)" +projectName+"</VcpkgManifestRoot>" << "\n";
         vcxprojFile << R"(    <VcpkgInstalledDir>.\vcpkg_installed\$(VcpkgTriplet)\</VcpkgInstalledDir>)" << "\n";
         vcxprojFile << R"(  </PropertyGroup>)" << "\n";
 
@@ -258,8 +258,8 @@ void SolutionGenerator::GeneratePrjFile(const std::string& reposName, const std:
     std::cout << "Fichier .prj genere \n";
 }
 
-void SolutionGenerator::AddProjectToPrj(const std::string& reposName, const std::string& projectName, bool vcpkg,
-    bool pch)
+void SolutionGenerator::CreateProject(const std::string& reposName, const std::string& projectName,
+    bool pch, bool vcpkg, bool window, bool lib)
 {
     std::string prjPath = FindPrjFile(reposName);
     std::ifstream prjFileRead(prjPath);
@@ -268,16 +268,32 @@ void SolutionGenerator::AddProjectToPrj(const std::string& reposName, const std:
     prjJson[projectName] =  nlohmann::json::parse(PROJECT_JSON);
     prjJson[projectName]["vcpkg"] = vcpkg ? "true" : "false";
     prjJson[projectName]["pch"] = pch ? "true" : "false";
+    prjJson[projectName]["window"] = window ? "true" : "false";
+    prjJson[projectName]["lib"] = lib ? "true" : "false";
     prjFileRead.close();
     
     std::ofstream prjFileWrite(prjPath);
     prjFileWrite << std::setw(4) << prjJson;
     prjFileWrite.close();
+
+    if (vcpkg && fs::create_directories(reposName + "/config/"+projectName))
+        CreateVcpkgFile( reposName, projectName );
+    if (fs::create_directories(reposName + "/src/"+projectName))
+    {
+        std::ofstream mainFile(reposName + "/src/"+projectName+"/main.cpp");
+        if (pch)
+        {
+            CreatePCHFile(reposName, projectName);
+            mainFile << "#include \"pch.h\"\n";
+        }
+        mainFile << ( window ? WINMAIN : MAIN );
+        mainFile.close();
+    }
     
     Utils::CoutColored("Project " + projectName + " added\n", Success);
 }
 
-void SolutionGenerator::MakeProject(const std::string& reposName)
+void SolutionGenerator::MakeProject(const std::string& reposName, bool openExplorer)
 {
     fs::create_directories(reposName+"/ide/vs");
 
@@ -314,7 +330,7 @@ void SolutionGenerator::MakeProject(const std::string& reposName)
     prjFile.close();
     GenerateSolution(reposName, projectsName, projectsGuid);
     Utils::CoutColored("Solution generee avec succes !\n", Success);
-    ShellExecuteA(NULL, "open", fs::absolute(reposName+"/ide/vs").string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+    if (openExplorer) ShellExecuteA(NULL, "open", fs::absolute(reposName+"/ide/vs").string().c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 void SolutionGenerator::PopulateVcxprojFile(const std::string& reposName, const std::string& projectName)
@@ -359,19 +375,19 @@ void SolutionGenerator::GetAllDirFiles(const std::string& dir, std::ofstream& vc
     }
 }
 
-void SolutionGenerator::AddVcpkgPort(const std::string& reposName, const std::string& port)
+void SolutionGenerator::AddVcpkgPort(const std::string& reposName, const std::string& projectName, const std::string& port)
 {
-    if (!fs::exists(reposName+"/config/vcpkg.json"))
+    if (!fs::exists(reposName+"/config/"+projectName+"/vcpkg.json"))
     {
         Utils::CoutColored("vcpkg n'est pas active pour ce projet !", Error);
         return;
     }
-    std::ifstream vcpkgFile(reposName+"/config/vcpkg.json");
+    std::ifstream vcpkgFile(reposName+"/config/"+projectName+"/vcpkg.json");
     nlohmann::json vcpkgJson = nlohmann::json::parse(vcpkgFile);
 
     vcpkgJson["dependencies"].push_back(port);
     
-    std::ofstream vcpkgFileStream(reposName+"/config/vcpkg.json");
+    std::ofstream vcpkgFileStream(reposName+"/config/"+projectName+"/vcpkg.json");
     vcpkgFileStream << std::setw(4) << vcpkgJson;
     vcpkgFile.close();
     vcpkgFileStream.close();
