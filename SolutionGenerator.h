@@ -15,7 +15,6 @@ public:
     void AddVcpkgPort(const std::string& reposName, const std::string& port);
 
 private:
-    void GenerateSolFile(const std::string& reposName, const std::string& solutionName, const std::string& projectName);
     void GeneratePrjFile(const std::string& reposName, const std::string& solutionName);
     void AddProjectToPrj(const std::string& reposName, const std::string& projectName, bool vcpkg, bool pch);
     void GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<long>& projectsGuid);

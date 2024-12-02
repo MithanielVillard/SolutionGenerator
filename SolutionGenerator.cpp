@@ -43,7 +43,6 @@ void SolutionGenerator::CreateProject(const std::string& reposName, const std::s
 
         std::cout << "Arborescence cree \n";
         
-        //GenerateSolFile(reposName, solutionName, projectName);
         GeneratePrjFile(reposName, solutionName);
         AddProjectToPrj(reposName, projectName, vcpkg, pch);
     }
@@ -205,6 +204,7 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
     vcxprojFile <<  "       <PrecompiledHeader>"+pch+"</PrecompiledHeader>" << "\n";
     vcxprojFile << R"(      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>)" << "\n";
     vcxprojFile << R"(      <LanguageStandard>stdcpp20</LanguageStandard>)" << "\n";
+    vcxprojFile << R"(      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>)" << "\n";
     vcxprojFile << R"(    </ClCompile>)" << "\n";
     vcxprojFile << R"(    <Link>)" << "\n";
     vcxprojFile << R"(      <SubSystem>Console</SubSystem>)" << "\n";
@@ -222,6 +222,7 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
     vcxprojFile <<  "       <PrecompiledHeader>"+pch+"</PrecompiledHeader>" << "\n";
     vcxprojFile << R"(      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>)" << "\n";
     vcxprojFile << R"(      <LanguageStandard>stdcpp20</LanguageStandard>)" << "\n";
+    vcxprojFile << R"(      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>)" << "\n";
     vcxprojFile << R"(    </ClCompile>)" << "\n";
     vcxprojFile << R"(    <Link>)" << "\n";
     vcxprojFile << R"(      <SubSystem>Console</SubSystem>)" << "\n";
@@ -243,23 +244,6 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
     }
 
     vcxprojFile.close();
-}
-
-void SolutionGenerator::GenerateSolFile(const std::string& reposName, const std::string& solutionName, const std::string& projectName)
-{
-    nlohmann::json solJson = 
-    {
-        {"solution_name", solutionName},
-        {"format_version", "12.00"},
-        {"version", "16"},
-        {"version_full", "16.0.30319.14"},
-        {"minimum_version", "10.0.40219.1"},
-        {"projects", projectName + ".prj"}
-    };
-    std::ofstream solFile(reposName+"/config/"+projectName+".sol");
-    solFile << std::setw(4) << solJson;
-    solFile.close();
-    std::cout << "Fichier .sol genere \n";
 }
 
 void SolutionGenerator::GeneratePrjFile(const std::string& reposName, const std::string& solutionName)
