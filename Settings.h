@@ -35,31 +35,33 @@
     "Options\n"\
     "+----------------------------------------------------------------------------------------------------------------+\n"\
     "|                                                                                                                |\n"\
-    "|  \033[2;37m-create \033[36m<Nom_du_repos> <Nom_de_la_solution> \033[33m{Nom_du_projet} {-pch} {-vcpkg} {-window} {-lib}\033[0m                  |\n"\
+    "|  \033[2;37m-create\033[0;36m <Nom_du_repos> <Nom_de_la_solution> \033[2m{Nom_du_projet} {-pch} {-vcpkg} {-window} {-lib}\033[0m                  |\n"\
     "|                                                                                                                |\n"\
     "|          Creer un projet avec le Solution Generator                                                            |\n"\
-    "|          <Nom_du_repos> Le nom du repos GitHub dans lequel la solution va s'installer                          |\n"\
-    "|          <Nom_de_la_solution> Le nom de la solution Visual Studio qui va etre cree                             |\n"\
-    "|          {Nom_du_projet} Le nom du premier projet qui va etre cree (optionnel), par defaut <Nom_de_la_solution>|\n"\
-    "|          {-pch} Active les header precompiles (pch) pour le projet (optionnel)                                 |\n"\
-    "|          {-vcpkg} Active le gestionnaire de dependances vcpkg pour le projet (optionnel)                       |\n"\
+    "|          \033[36m<Nom_du_repos>\033[0m Le nom du repos GitHub dans lequel la solution va s'installer                          |\n"\
+    "|          \033[36m<Nom_de_la_solution>\033[0m Le nom de la solution Visual Studio qui va etre cree                             |\n"\
+    "|          \033[2;36m{Nom_du_projet}\033[0m Le nom du premier projet qui va etre cree (optionnel), par defaut <Nom_de_la_solution>|\n"\
+    "|          \033[2;36m{-pch}\033[0m Active les header precompiles (pch) pour le projet (optionnel)                                 |\n"\
+    "|          \033[2;36m{-vcpkg}\033[0m Active le gestionnaire de dependances vcpkg pour le projet (optionnel)                       |\n"\
     "|                                                                                                                |\n"\
-    "|  \033[2;37m-make \033[36m<dossier_racine> \033[33m{-clean} {-noOpen}\033[0m                                                                        |\n"\
+    "|  \033[2;37m-make\033[0;36m <dossier_racine> \033[2m{-clean} {-noOpen}\033[0m                                                                     |\n"\
     "|                                                                                                                |\n"\
-    "|          <dossier_racine> Generer la solution a partir du dossier racine                                       |\n"\
-    "|          {-clean} Retire les fichiers existants (optionnel)                                                    |\n"\
-    "|          {-noOpen} N'ouvre pas l'explorateur de fichier après le make                                          |\n"\
+    "|          \033[36m<dossier_racine>\033[0m Generer la solution a partir du dossier racine                                       |\n"\
+    "|          \033[2;36m{-clean}\033[0m Retire les fichiers existants (optionnel)                                                    |\n"\
+    "|          \033[2;36m{-noOpen}\033[0m N'ouvre pas l'explorateur de fichier aprws le make                                          |\n"\
     "|                                                                                                                |\n"\
-    "|  \033[2;37m-add_port \033[36m<Nom_du_projet> <Dependance> <Nom_du_repos>\033[0m                                                         |\n"\
+    "|  \033[2;37m-add_port\033[0;36m <Nom_du_projet> <Dependance> <Nom_du_repos>\033[0m                                                         |\n"\
+    "|                                                                                                                |\n"\
     "|          Ajouter une dependance avec vcpkg                                                                     |\n"\
-    "|          <Nom_du_projet> Le nom du projet sur lequel ajouter la dependance                                     |\n"\
-    "|          <Dependance> Le nom de la dependance vcpkg (https://vcpkg.link/ports)                                 |\n"\
-    "|          <Nom_du_repos> Le nom du repos GitHub ou se trouve le projet                                          |\n"\
+    "|          \033[36m<Nom_du_projet>\033[0m Le nom du projet sur lequel ajouter la dependance                                     |\n"\
+    "|          \033[36m<Dependance>\033[0m Le nom de la dependance vcpkg (https://vcpkg.link/ports)                                 |\n"\
+    "|          \033[36m<Nom_du_repos>\033[0m Le nom du repos GitHub ou se trouve le projet                                          |\n"\
     "|                                                                                                                |\n"\
-    "|  \033[2;37m-add_project \033[36m<Nom_du_projet> <Nom_du_repos>\033[0m                                                                   |\n"\
+    "|  \033[2;37m-add_project\033[0;36m <Nom_du_projet> <Nom_du_repos>\033[0m                                                                   |\n"\
+    "|                                                                                                                |\n"\
     "|          Ajouter un projet a la solution Visual Studio                                                         |\n"\
-    "|          <Nom_du_projet> Le nom du projet a ajouter a la solution Visual Studio                                |\n"\
-    "|          <Nom_du_repos> Le nom du repos GitHub ou se trouve le projet                                          |\n"\
+    "|          \033[36m<Nom_du_projet>\033[0m Le nom du projet a ajouter a la solution Visual Studio                                |\n"\
+    "|          \033[36m<Nom_du_repos>\033[0m Le nom du repos GitHub ou se trouve le projet                                          |\n"\
     "|                                                                                                                |\n"\
     "|  \033[2;37m-help\033[0m                                                                                                         |\n"\
     "|         Montre ce message d'aide                                                                               |\n"\
