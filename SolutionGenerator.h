@@ -14,13 +14,16 @@ public:
         bool pch = false, bool vcpkg = false, bool window = false, bool lib = false);
     void MakeProject(const std::string& reposName, bool openExplorer = true);
     void AddVcpkgPort(const std::string& reposName, const std::string& projectName, const std::string& port);
+    void AddReference(const std::string& reposName, const std::string& projectName, const std::string& reference);
     void CreateProject(const std::string& reposName, const std::string& projectName,
         bool pch = false, bool vcpkg = false, bool window = false, bool lib = false);
 
 private:
     void GeneratePrjFile(const std::string& reposName, const std::string& solutionName);
-    void GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<long>& projectsGuid);
-    void GenerateVcxprojFile(const std::string& reposName, const std::string& projectName, long projectGuid, const std::string& pch, bool vcpkg);
+    void GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<std::string>&
+                          projectsGuid);
+    void GenerateVcxprojFile(const std::string& reposName, const std::string& projectName, const std::string& projectGuid, const std::string& pch, bool
+                             vcpkg, bool lib);
 
     void PopulateVcxprojFile(const std::string& reposName, const std::string& projectName);
 

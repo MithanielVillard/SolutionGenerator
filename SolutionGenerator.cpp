@@ -86,7 +86,7 @@ void SolutionGenerator::CreateVcpkgFile(const std::string& reposName, const std:
     configFile.close();
 }
 
-void SolutionGenerator::GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<long>& projectsGuid)
+void SolutionGenerator::GenerateSolution(const std::string& reposName, const std::vector<std::string>& projectsName, const std::vector<std::string>& projectsGuid)
 {
     std::ifstream solFile;
     std::string solutionName = FindPrjFile(reposName);
@@ -101,7 +101,7 @@ void SolutionGenerator::GenerateSolution(const std::string& reposName, const std
     file << "MinimumVisualStudioVersion = 10.0.40219.1\n";
 
     for (int i = 0; i < projectsName.size(); ++i)
-        file << "Project(\"{" << projectsGuid[i] << "}\") = \"" << projectsName[i] << "\", \"" << projectsName[i] << "\\" << projectsName[i] << ".vcxproj\", \"{" << projectsGuid[i] << "}\"\n";
+        file << "Project(\"" << projectsGuid[i] << "\") = \"" << projectsName[i] << "\", \"" << projectsName[i] << "\\" << projectsName[i] << ".vcxproj\", \"" << projectsGuid[i] << "\"\n";
     file << "EndProject\n";
 
 
@@ -111,12 +111,12 @@ void SolutionGenerator::GenerateSolution(const std::string& reposName, const std
     file << "\t\tRelease|x64 = Release|x64\n";
     file << "\tEndGlobalSection\n";
     file << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n";
-    for (const long& projectGuid : projectsGuid)
+    for (const std::string& projectGuid : projectsGuid)
     {
-        file << "\t\t{" << projectGuid << "}.Debug|x64.ActiveCfg = Debug|x64\n";
-        file << "\t\t{" << projectGuid << "}.Debug|x64.Build.0 = Debug|x64\n";
-        file << "\t\t{" << projectGuid << "}.Release|x64.ActiveCfg = Release|x64\n";
-        file << "\t\t{" << projectGuid << "}.Release|x64.Build.0 = Release|x64\n";
+        file << "\t\t" << projectGuid << ".Debug|x64.ActiveCfg = Debug|x64\n";
+        file << "\t\t" << projectGuid << ".Debug|x64.Build.0 = Debug|x64\n";
+        file << "\t\t" << projectGuid << ".Release|x64.ActiveCfg = Release|x64\n";
+        file << "\t\t" << projectGuid << ".Release|x64.Build.0 = Release|x64\n";
     }
     file << "\tEndGlobalSection\n";
     file << "EndGlobal\n";
@@ -136,11 +136,12 @@ std::string SolutionGenerator::FindPrjFile(const std::string& reposName)
     return std::string("");
 }
 
-void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const std::string& projectName, long projectGuid, const std::string& pch, const bool vcpkg)
+void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const std::string& projectName, const std::string& projectGuid,
+    const std::string& pch, const bool vcpkg, const bool lib)
 {
     std::ofstream vcxprojFile(reposName+"/ide/vs/"+projectName+"/"+projectName+".vcxproj");
     
-   vcxprojFile << R"(<?xml version="1.0" encoding="utf-8"?>)" << "\n";
+    vcxprojFile << R"(<?xml version="1.0" encoding="utf-8"?>)" << "\n";
     vcxprojFile << R"(<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">)" << "\n";
 
     vcxprojFile << R"(  <ItemGroup Label="ProjectConfigurations">)" << "\n";
@@ -155,7 +156,7 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
     vcxprojFile << R"(  </ItemGroup>)" << "\n";
 
     vcxprojFile << R"(  <PropertyGroup Label="Globals">)" << "\n";
-    vcxprojFile <<  "     <ProjectGuid>{"+std::to_string(projectGuid)+"}</ProjectGuid>" << "\n";
+    vcxprojFile <<  "     <ProjectGuid>"+projectGuid+"</ProjectGuid>" << "\n";
     vcxprojFile <<  "     <RootNamespace>"+projectName+"</RootNamespace>" << "\n";
     vcxprojFile << R"(    <Keyword>Win32Proj</Keyword>)" << "\n";
     vcxprojFile << R"(  </PropertyGroup>)" << "\n";
@@ -181,7 +182,7 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
     vcxprojFile << R"(  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />)" << "\n";
 
     vcxprojFile << R"(  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">)" << "\n";
-    vcxprojFile << R"(    <ConfigurationType>Application</ConfigurationType>)" << "\n";
+    vcxprojFile <<  "     <ConfigurationType>" << (lib ? "StaticLibrary" : "Application") << "</ConfigurationType>" << "\n";
     vcxprojFile << R"(    <OutDir>$(ProjectDir)Build\$(Configuration)\</OutDir>)" << "\n";
     vcxprojFile << R"(    <IntDir>$(ProjectDir)Build\$(Configuration)\intermediate\</IntDir>)" << "\n";
     vcxprojFile << R"(    <PlatformToolset>v143</PlatformToolset>)" << "\n";
@@ -189,7 +190,7 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
     vcxprojFile << R"(  </PropertyGroup>)" << "\n";
 
     vcxprojFile << R"(  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">)" << "\n";
-    vcxprojFile << R"(    <ConfigurationType>Application</ConfigurationType>)" << "\n";
+    vcxprojFile <<  "     <ConfigurationType>" << (lib ? "StaticLibrary" : "Application") << "</ConfigurationType>" << "\n";
     vcxprojFile << R"(    <OutDir>$(ProjectDir)Build\$(Configuration)\</OutDir>)" << "\n";
     vcxprojFile << R"(    <IntDir>$(ProjectDir)Build\$(Configuration)\intermediate\</IntDir>)" << "\n";
     vcxprojFile << R"(    <PlatformToolset>v143</PlatformToolset>)" << "\n";
@@ -243,6 +244,25 @@ void SolutionGenerator::GenerateVcxprojFile(const std::string& reposName, const 
         vcxprojFile <<  "</ItemGroup>" << "\n";
     }
 
+    std::ifstream prjFIle(FindPrjFile(reposName));
+    nlohmann::json prjJson = nlohmann::json::parse(prjFIle);
+    
+    if (prjJson[projectName]["references"].is_null())
+    {
+        vcxprojFile.close();
+        return;
+    }
+        
+    for (std::string reference : prjJson[projectName]["references"])
+    {
+        nlohmann::json refJson = prjJson[reference];
+        vcxprojFile << "<ItemGroup>" << "\n";
+        vcxprojFile << R"(  <ProjectReference Include="..\)"+reference+"\\"+reference+R"(.vcxproj">)" << "\n";
+        vcxprojFile <<  "     <Project>"+std::string(refJson["GUID"])+"</Project>" << "\n";
+        vcxprojFile <<  "   </ProjectReference>" << "\n";
+        vcxprojFile <<  "</ItemGroup>" << "\n";
+    }
+
     vcxprojFile.close();
 }
 
@@ -270,6 +290,7 @@ void SolutionGenerator::CreateProject(const std::string& reposName, const std::s
     prjJson[projectName]["pch"] = pch ? "true" : "false";
     prjJson[projectName]["window"] = window ? "true" : "false";
     prjJson[projectName]["lib"] = lib ? "true" : "false";
+    prjJson[projectName]["GUID"] = Utils::GenerateGUID();
     prjFileRead.close();
     
     std::ofstream prjFileWrite(prjPath);
@@ -298,7 +319,7 @@ void SolutionGenerator::MakeProject(const std::string& reposName, bool openExplo
     fs::create_directories(reposName+"/ide/vs");
 
     std::vector<std::string> projectsName;
-    std::vector<long> projectsGuid;
+    std::vector<std::string> projectsGuid;
 
     std::ifstream prjFile(FindPrjFile(reposName));
     nlohmann::json prjJson = nlohmann::json::parse(prjFile);
@@ -314,9 +335,12 @@ void SolutionGenerator::MakeProject(const std::string& reposName, bool openExplo
         }
 
         fs::create_directories(reposName+"/ide/vs/"+=projectName);
-        long projectGuid = Utils::GenerateGUID();
+        std::string projectGuid = prjJson[projectName]["GUID"];
         
-        GenerateVcxprojFile(reposName, projectName, projectGuid, prjJson[projectName]["pch"] == std::string("true") ? "Use" : "NotUsing", prjJson[projectName]["vcpkg"] == std::string("true"));
+        GenerateVcxprojFile(reposName, projectName, projectGuid,
+            prjJson[projectName]["pch"] == std::string("true") ? "Use" : "NotUsing",
+            prjJson[projectName]["vcpkg"] == std::string("true"),
+            prjJson[projectName]["lib"] == std::string("true"));
         PopulateVcxprojFile(reposName, projectName);
 
         projectsName.push_back(projectName);
@@ -396,3 +420,37 @@ void SolutionGenerator::AddVcpkgPort(const std::string& reposName, const std::st
     Utils::CoutColored(port, Warning);
     Utils::CoutColored(" ajoutee avec succes ^^", Success);
 }
+
+void SolutionGenerator::AddReference(const std::string& reposName, const std::string& projectName, const std::string& reference)
+{
+    std::string prjPath = FindPrjFile(reposName);
+    std::ifstream configFile(prjPath);
+    nlohmann::json configJson = nlohmann::json::parse(configFile);
+
+    if (configJson.find(reference) == configJson.end())
+    {
+        Utils::CoutColored("La solution Visual Studio ne contient pas le projet :", Error);
+        Utils::CoutColored(reference, Warning);
+        return;
+    }
+
+    if (configJson.find(projectName) == configJson.end())
+    {
+        Utils::CoutColored("La solution Visual Studio ne contient pas le projet :", Error);
+        Utils::CoutColored(projectName, Warning);
+        return;
+    }
+    
+    configJson[projectName]["references"].push_back(reference);
+
+    std::ofstream configFileStream(prjPath);
+    configFileStream << std::setw(4) << configJson;
+    configFileStream.close();
+    configFile.close();
+
+    Utils::CoutColored("Projet ", Success);
+    Utils::CoutColored(reference, Warning);
+    Utils::CoutColored(" ajoute avec comme reference au projet ", Success);
+    Utils::CoutColored(projectName, Warning);
+}
+

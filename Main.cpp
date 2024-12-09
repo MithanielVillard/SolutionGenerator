@@ -64,6 +64,17 @@ int main(int argc, char* argv[])
         sg.AddVcpkgPort(argv[4], argv[2], argv[3]);
     }
 
+    if (argv[1] == std::string("-add_reference"))
+    {
+        if (argc < 5)
+        {
+            Utils::CoutColored("Nombre d'argument incorect ! Utilise -help pour avoir de l'aide.\n", Error);
+            return 1;
+        }
+        SolutionGenerator sg;
+        sg.AddReference(argv[4], argv[2], argv[3]);
+    }
+
     if (argv[1] == std::string("-add_project"))
     {
         if (argc < 4)
