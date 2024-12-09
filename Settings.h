@@ -26,7 +26,7 @@
 // Cyan Background - 46
 // White Background - 47
 
-#define VERSION "beta 1.16"
+#define VERSION "beta 1.16.2"
 
 #define HELP_MESSAGE \
     "\nLe Solution Generator est un outil permettant de generer des solutions Visual Studio.\n" \
