@@ -11,6 +11,6 @@ class Utils
 {
 public:
     static void CoutColored(const std::string& message, Colors color);
-    static long GenerateGUID();
+    static std::string GenerateGUID();
     static std::string GetSrcFilePath(const std::filesystem::path& path);
 };

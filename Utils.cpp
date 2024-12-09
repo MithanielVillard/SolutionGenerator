@@ -10,7 +10,7 @@ void Utils::CoutColored(const std::string& message, Colors color)
     SetConsoleTextAttribute(hConsole, Normal);
 }
 
-long Utils::GenerateGUID()
+std::string Utils::GenerateGUID()
 {
     GUID guidReference;
     HRESULT hCreateGuid = CoCreateGuid(&guidReference);
@@ -19,7 +19,15 @@ long Utils::GenerateGUID()
         CoutColored("Erreur lors de la generation de GUID du projet !", Error);
         return 0;
     }
-    return guidReference.Data1;
+
+    wchar_t wszGuid[40];
+    StringFromGUID2(guidReference, wszGuid, 40);
+
+    char szGuid[40];
+    size_t convertedChars = 0;
+    wcstombs_s(&convertedChars, szGuid, sizeof(szGuid), wszGuid, _TRUNCATE);
+    
+    return {szGuid};
 }
 
 std::string Utils::GetSrcFilePath(const std::filesystem::path& path)

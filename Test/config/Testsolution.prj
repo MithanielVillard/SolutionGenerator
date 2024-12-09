@@ -1,0 +1,9 @@
+{
+    "Testsolution": {
+        "lib": "false",
+        "pch": "false",
+        "vcpkg": "false",
+        "window": "false"
+    },
+    "solution_name": "Testsolution"
+}
