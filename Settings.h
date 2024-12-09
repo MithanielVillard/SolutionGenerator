@@ -63,6 +63,13 @@
     "|          \033[36m<Nom_du_projet>\033[0m Le nom du projet a ajouter a la solution Visual Studio                                |\n"\
     "|          \033[36m<Nom_du_repos>\033[0m Le nom du repos GitHub ou se trouve le projet                                          |\n"\
     "|                                                                                                                |\n"\
+    "|  \033[2;37m-add_reference\033[0;36m <Nom_du_projet> <Reference> <Nom_du_repos>\033[0m                                                     |\n"\
+    "|                                                                                                                |\n"\
+    "|          Ajoute un projet en reference a un autre projet                                                       |\n"\
+    "|          \033[36m<Nom_du_projet>\033[0m Le nom du projet auquel rajouter une reference                                        |\n"\
+    "|          \033[36m<Reference>\033[0m Le nom du projet a rajouter en tant que reference                                         |\n"\
+    "|          \033[36m<Nom_du_repos>\033[0m Le nom du repos GitHub ou se trouve le projet                                          |\n"\
+    "|                                                                                                                |\n"\
     "|  \033[2;37m-help\033[0m                                                                                                         |\n"\
     "|         Montre ce message d'aide                                                                               |\n"\
     "|                                                                                                                |\n"\
